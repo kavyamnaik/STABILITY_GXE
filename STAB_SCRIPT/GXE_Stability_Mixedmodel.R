@@ -24,11 +24,13 @@ write_with_title <- function(wb, sheet, title, data) {
 data_dir    <- "STAB_DATA"
 results_dir <- "STAB_RESULTS"
 figures_dir <- file.path(results_dir, "FIGURES")
+qc_dir <- file.path(results_dir, "QC")
 
 ## Create directories if they do not exist
 dir.create(data_dir, showWarnings = FALSE)
 dir.create(results_dir, showWarnings = FALSE)
 dir.create(figures_dir, showWarnings = FALSE)
+dir.create(qc_dir, showWarnings = FALSE)
 
 ## Output workbook path
 workbook <- file.path(results_dir, "MET_Summary.xlsx")
@@ -50,7 +52,7 @@ if (length(missing_cols) > 0) {
 }
 
 ## ---- Convert design variables to factors ----
-dataset %>%
+dataset<- dataset %>%
   mutate(
     GENO = factor(GENO),
     ENV  = factor(ENV),
@@ -125,7 +127,7 @@ print(vcomp_HT)
 
 blupg_HT <- get_model_data(model_HT, "blupg") #Genotype BLUPs (HT)
 blupge_HT <- get_model_data(model_HT, "blupge") #G×E BLUPs (HT)
-bluege_HT <- get_model_data(model_HT, "bluege") #Predicted values (HT)
+bluege_HT <- get_model_data(model_HT, "bluege") #Predicted values (HT) (BLUPg + BLUPge)
 
 #BLUP model for YLD
 model_YLD <- gamem_met(
@@ -155,10 +157,10 @@ model_waasb <- waasb(
 class(model_waasb)
 names(model_waasb)
 
-#WAASB indices
+#WAASB indices (Lower WAASB = more stable genotype)
 waasb_indices <- get_model_data(model_waasb, "WAASB") #for all traits
 
-ipca_weights <- get_model_data(model_waasb, "PctWAASB") #IPCA contribution (weights)
+ipca_weights <- get_model_data(model_waasb, "PctWAASB") #IPCA contribution (weights), This replaces old AMMI F-tests
 lrt_results <- get_model_data(model_waasb, "lrt") #Likelihood Ratio Test (G×E significance)
 genetic_params <- get_model_data(model_waasb, "genpar") #Genetic parameters
 
